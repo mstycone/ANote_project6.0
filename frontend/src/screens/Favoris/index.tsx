@@ -1,24 +1,24 @@
 import { EmptyFavList } from "@/src/components/Favoris/EmptyFavList";
 import { Task } from "@/src/components/Task/Task";
 import { TaskModal } from "@/src/components/Task/TaskModal";
-import { useTasks } from "@/src/context/TasksContext";
 import { useTaskHandlers } from '@/src/hooks/useTaskHandlers';
 import AntDesign from "@expo/vector-icons/AntDesign";
 import React from "react";
 import { FlatList, StyleSheet, Text, View } from "react-native";
 
 export default function Favoris() {
-  const { tasks } = useTasks();
+  
   const {
-      selectedTask,
-      modalVisible,
-      setModalVisible,
-      handleCheck,
-      handleRemoveTask,
-      handleOpenTask,
-      handleSaveTask,
-      handleToggleImportant 
-    } = useTaskHandlers([]);
+    tasks,
+    selectedTask,
+    modalVisible,
+    setModalVisible,
+    handleCheck,
+    handleRemoveTask,
+    handleOpenTask,
+    handleSaveTask,
+    handleToggleImportant 
+  } = useTaskHandlers();
 
   // Filtrer les tâches marquées comme importantes
   const importantTasks = tasks.filter((task) => task.important);

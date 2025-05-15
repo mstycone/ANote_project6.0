@@ -1,6 +1,6 @@
 //import { StatusBar } from "react-native";
-import { Home } from "@/src/screens/Home";
 import React from 'react';
+import { Home } from "@/src/screens/Home";
 import 'react-native-get-random-values';
 
 

@@ -1,14 +1,73 @@
-// src/hooks/useHomeTasks.ts
-import { useTasks } from "@/src/context/TasksContext";
+import { useTasks } from "@/src/hooks/useTasksApi";
 import { TaskProps } from "@/src/screens/Home";
+import { useAuth } from "@/src/context/AuthContext";
 import { useState } from "react";
 import { Alert } from "react-native";
 
+
 export function useTaskHandlers() {
-  const { tasks, setTasks } = useTasks();
+  const {
+    tasks,
+    setTasks,
+    createTask,
+    updateTask,
+    deleteTask
+  } = useTasks();
+
   const [taskTitle, setTaskTitle] = useState("");
   const [selectedTask, setSelectedTask] = useState<TaskProps | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
+  const { isAuthenticated } = useAuth();
+
+  function handleCheck(id: string) {
+    const updatedTasks = tasks.map((item) =>
+      item.id === id ? { ...item, checked: !item.checked } : item
+    );
+    setTasks(updatedTasks);
+
+    const updatedTask = updatedTasks.find((t) => t.id === id);
+    if (updatedTask) updateTask(updatedTask); // ici on persiste
+  }
+
+  function handleRemoveTask(id: string) {
+    Alert.alert(
+      "Supprimer",
+      "Êtes-vous sûr de vouloir supprimer cette tâche ?",
+      [
+        {
+          text: "Oui",
+          onPress: () => {
+            deleteTask(id); // API + setTasks inclus
+          },
+        },
+        { text: "Non", style: "cancel" },
+      ]
+    );
+  }
+
+  function handleSaveTask(updatedTask: TaskProps) {
+    if (tasks.some((t) => t.id === updatedTask.id)) {
+      updateTask(updatedTask);
+    } else {
+      createTask(updatedTask);
+    }
+    setSelectedTask(null);
+  }
+
+  function handleToggleImportant(id: string) {
+    const updatedTasks = tasks.map((task) =>
+      task.id === id ? { ...task, important: !task.important } : task
+    );
+    setTasks(updatedTasks);
+    const updatedTask = updatedTasks.find((t) => t.id === id);
+    if (updatedTask) updateTask(updatedTask);
+  }
+
+  function handleOpenTask(task: TaskProps) {
+    setSelectedTask(task);
+    setModalVisible(true);
+  }
 
   function handleCreateNewTask() {
     const newTask: TaskProps = {
@@ -17,69 +76,19 @@ export function useTaskHandlers() {
       checked: false,
       description: "",
       listItems: [],
+      important: false
     };
-
     setSelectedTask(newTask);
     setModalVisible(true);
   }
 
-  function handleCheck(id: string) {
-    const newTasks = tasks.map((item) => {
-      if (item.id === id) item.checked = !item.checked;
-      return item;
-    });
-
-    setTasks(newTasks);
-  }
-
-  function handleRemoveTask(id: string) {
-    Alert.alert(
-      "Supprimer",
-      `Êtes-vous sûre de vouloir supprimer cette tâche`,
-      [
-        {
-          text: "Oui",
-          onPress: () => {
-            const newTasks = tasks.filter((item) => item.id !== id);
-            setTasks(newTasks);
-          },
-        },
-        { text: "Non", style: "cancel" },
-      ]
-    );
-  }
-
-  function handleOpenTask(task: TaskProps) {
-    setSelectedTask(task);
-    setModalVisible(true);
-  }
-
-  function handleSaveTask(updatedTask: TaskProps) {
-    const exists = tasks.some((task) => task.id === updatedTask.id);
-
-    if (exists) {
-      setTasks((prev) =>
-        prev.map((task) =>
-          task.id === updatedTask.id ? updatedTask : task
-        )
-      );
+  function handleProtectedCreate() {
+    if (isAuthenticated) {
+      handleCreateNewTask();
     } else {
-      setTasks((prev) => [...prev, updatedTask]);
+      setShowLogin(true);
     }
-
-    setSelectedTask(null);
   }
-
-  function handleToggleImportant(id: string) {
-    const newTasks = tasks.map((task) => {
-      if (task.id === id) {
-        return { ...task, important: !task.important };
-      }
-      return task;
-    });
-  
-    setTasks(newTasks);
-  }  
 
   return {
     tasks,
@@ -89,11 +98,13 @@ export function useTaskHandlers() {
     modalVisible,
     setModalVisible,
     setSelectedTask,
-    handleCreateNewTask,
+    handleProtectedCreate,
+    showLogin,
+    setShowLogin,
     handleCheck,
     handleRemoveTask,
     handleOpenTask,
     handleSaveTask,
-    handleToggleImportant
+    handleToggleImportant,
   };
 }

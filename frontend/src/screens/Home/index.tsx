@@ -4,6 +4,8 @@ import { Task } from "@/src/components/Task/Task";
 import { TaskInfo } from "@/src/components/Task/TaskInfo";
 import { TaskModal } from "@/src/components/Task/TaskModal";
 import { useTaskHandlers } from '@/src/hooks/useTaskHandlers';
+import { LoginModal } from "@/src/components/Connexion/LoginModal"; 
+
 import React from "react";
 import { FlatList, View } from "react-native";
 
@@ -21,21 +23,24 @@ export type TaskProps = {
   checked: boolean;
   description?: string;
   listItems?: SubItem[]; //Sous-tâches 
-  important?: boolean;//favoris 
+  important?: boolean; //favoris 
 };
 
 export function Home() {
-  const { tasks,
+  const { 
+    tasks,
     selectedTask,
     modalVisible,
     setModalVisible,
-    handleCreateNewTask,
+    handleProtectedCreate,
+    showLogin, 
+    setShowLogin,
     handleCheck,
     handleRemoveTask,
     handleOpenTask,
     handleSaveTask,
     handleToggleImportant 
-  } = useTaskHandlers([]);
+  } = useTaskHandlers();
 
   return (
     <View style={styles.container}>
@@ -52,6 +57,7 @@ export function Home() {
           color="#8284FA"
         />
       </View>
+      
       <FlatList
         data={tasks}
         renderItem={({ item }) => (
@@ -77,7 +83,8 @@ export function Home() {
         onClose={() => setModalVisible(false)}
         onSave={handleSaveTask}
       />
-      <ButtonAdd onPress={handleCreateNewTask}/>
+      <ButtonAdd onPress={handleProtectedCreate}/>
+      <LoginModal visible={showLogin} onClose={() => setShowLogin(false)} />
     </View>
   );
 }

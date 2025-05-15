@@ -1,5 +1,4 @@
 import TabBar from '@/src/components/TabBar/TabBar';
-import { TasksProvider } from "@/src/context/TasksContext";
 import { Tabs } from 'expo-router';
 import React from 'react';
 
@@ -10,7 +9,6 @@ import React from 'react';
 export default function TabLayout() {
 
   return (
-    <TasksProvider>
       <Tabs 
         tabBar={props => <TabBar {...props} />}
       >
@@ -33,6 +31,5 @@ export default function TabLayout() {
           }} 
         />
       </Tabs>
-    </TasksProvider>
   );
 }
